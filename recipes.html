@@ -1,0 +1,530 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="mobile-web-app-capable" content="yes">
+<title>Mes Recettes</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --accent-rgb: 78,18,48;
+    --accent: rgb(var(--accent-rgb));
+  }
+
+  *, *::before, *::after { box-sizing: border-box; }
+
+  body {
+    font-family: 'Playfair Display', Georgia, serif;
+    background: #F5F4F2;
+    color: var(--accent);
+    margin: 0;
+    padding: 0;
+    transition: color 0.3s;
+  }
+
+  header {
+    padding: 2.5rem 2rem 0;
+    text-align: center;
+  }
+  header h1 {
+    font-weight: 900;
+    font-size: 2.4rem;
+    color: var(--accent);
+    margin: 0 0 1.5rem;
+    transition: color 0.3s;
+  }
+
+  .tabs {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    padding: 0 1rem;
+    border-bottom: 1px solid rgba(var(--accent-rgb),0.15);
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    transition: border-color 0.3s;
+  }
+  .tab-btn {
+    font-family: 'Playfair Display', Georgia, serif;
+    font-weight: 400;
+    font-size: 1rem;
+    background: none;
+    color: rgba(var(--accent-rgb),0.35);
+    border: none;
+    padding: 0.6rem 0;
+    margin-bottom: -1px;
+    cursor: pointer;
+    white-space: nowrap;
+    border-bottom: 2px solid transparent;
+    transition: color 0.3s, border-color 0.3s;
+  }
+  .tab-btn:hover {
+    color: rgba(var(--accent-rgb),0.65);
+  }
+  .tab-btn.active {
+    color: var(--accent);
+    font-weight: 700;
+    border-bottom-color: var(--accent);
+  }
+
+  main {
+    max-width: 920px;
+    margin: 0 auto;
+    padding: 2rem 1.5rem;
+  }
+
+  .tab-content {
+    display: none;
+  }
+  .tab-content.active {
+    display: block;
+  }
+
+  .recipe-header {
+    display: flex;
+    align-items: baseline;
+    gap: 1.2rem;
+    margin-bottom: 1.2rem;
+  }
+  .recipe-header h2 {
+    font-weight: 900;
+    font-size: 1.6rem;
+    color: var(--accent);
+    margin: 0;
+  }
+  .recipe-header label {
+    font-size: 0.9rem;
+    font-weight: 400;
+    color: rgba(var(--accent-rgb),0.4);
+  }
+
+  .servings-input {
+    width: 48px;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.95rem;
+    padding: 3px 6px;
+    border: 1px solid rgba(var(--accent-rgb),0.2);
+    border-radius: 3px;
+    background: transparent;
+    color: var(--accent);
+    text-align: center;
+    transition: border-color 0.3s, color 0.3s;
+  }
+  .servings-input:focus {
+    outline: none;
+    border-color: var(--accent);
+  }
+
+  .table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  table {
+    border-collapse: collapse;
+    border: 1px solid rgba(var(--accent-rgb),0.15);
+  }
+
+  td {
+    border: 1px solid rgba(var(--accent-rgb),0.08);
+    padding: 7px 11px;
+    vertical-align: middle;
+    font-size: 0.88rem;
+    font-weight: 400;
+    color: var(--accent);
+  }
+
+  td.prep {
+    text-align: center;
+    font-style: italic;
+    color: rgba(var(--accent-rgb),0.5);
+    font-size: 0.85rem;
+  }
+
+  td.ingredient {
+    min-width: 240px;
+  }
+
+  td.action {
+    text-align: center;
+    font-weight: 700;
+    color: var(--accent);
+    background: rgba(var(--accent-rgb),0.06);
+    min-width: 50px;
+    font-size: 0.82rem;
+  }
+
+  td.empty {
+    min-width: 12px;
+  }
+
+  h1.inked {
+    filter: url(#ink-h1);
+  }
+  h2.inked {
+    filter: url(#ink-h2);
+  }
+
+  @media (prefers-contrast: more) {
+    .inked { filter: none; }
+  }
+
+  .table-wrap {
+    cursor: pointer;
+  }
+
+  #fs-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: #F5F4F2;
+    flex-direction: column;
+  }
+  #fs-overlay:fullscreen,
+  #fs-overlay:-webkit-full-screen {
+    background: #F5F4F2;
+  }
+  #fs-overlay.active {
+    display: flex;
+  }
+  .fs-close {
+    flex-shrink: 0;
+    align-self: flex-end;
+    margin: 0.8rem 0.8rem 0;
+    background: none;
+    border: none;
+    font-family: 'Playfair Display', Georgia, serif;
+    font-size: 0.95rem;
+    color: rgba(var(--accent-rgb),0.4);
+    cursor: pointer;
+    padding: 0.4rem 0.6rem;
+    transition: color 0.2s;
+  }
+  .fs-close:hover {
+    color: var(--accent);
+  }
+  #fs-container {
+    flex: 1;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #fs-container table {
+    margin: auto;
+  }
+  #fs-container td {
+    padding: 10px 14px;
+    font-size: 1rem;
+  }
+  @media (max-width: 640px) {
+    #fs-container {
+      align-items: flex-start;
+    }
+    #fs-container td {
+      padding: 7px 9px;
+      font-size: 0.85rem;
+    }
+  }
+
+  @media (max-width: 640px) {
+    header { padding: 1.8rem 1rem 0; }
+    header h1 { font-size: 1.8rem; margin-bottom: 1rem; }
+    .tabs { gap: 1.2rem; }
+    .tab-btn { font-size: 0.9rem; }
+    main { padding: 1.2rem 0.5rem; }
+    .recipe-header {
+      flex-direction: column;
+      gap: 0.4rem;
+    }
+    .recipe-header h2 { font-size: 1.3rem; }
+    td {
+      padding: 5px 7px;
+      font-size: 0.8rem;
+    }
+    td.ingredient { min-width: 170px; }
+  }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <filter id="ink-h1" x="-12%" y="-12%" width="124%" height="124%"
+            color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045"
+                    numOctaves="3" seed="9" result="w"/>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="0.25"
+                         xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feGaussianBlur in="d" stdDeviation="0.85" result="b"/>
+      <feColorMatrix in="b" type="matrix"
+                     values="1 0 0 0 0
+                             0 1 0 0 0
+                             0 0 1 0 0
+                             0 0 0 13 -3.7" result="p"/>
+      <feGaussianBlur in="p" stdDeviation="0.9" result="h"/>
+      <feColorMatrix in="h" type="matrix"
+                     values="1 0 0 0 0
+                             0 1 0 0 0
+                             0 0 1 0 0
+                             0 0 0 0.35 0" result="hz"/>
+      <feMerge>
+        <feMergeNode in="hz"/>
+        <feMergeNode in="p"/>
+      </feMerge>
+    </filter>
+    <filter id="ink-h2" x="-12%" y="-12%" width="124%" height="124%"
+            color-interpolation-filters="sRGB">
+      <feTurbulence type="fractalNoise" baseFrequency="0.045"
+                    numOctaves="3" seed="9" result="w"/>
+      <feDisplacementMap in="SourceGraphic" in2="w" scale="0.17"
+                         xChannelSelector="R" yChannelSelector="G" result="d"/>
+      <feGaussianBlur in="d" stdDeviation="0.55" result="b"/>
+      <feColorMatrix in="b" type="matrix"
+                     values="1 0 0 0 0
+                             0 1 0 0 0
+                             0 0 1 0 0
+                             0 0 0 13 -3.7" result="p"/>
+      <feGaussianBlur in="p" stdDeviation="0.6" result="h"/>
+      <feColorMatrix in="h" type="matrix"
+                     values="1 0 0 0 0
+                             0 1 0 0 0
+                             0 0 1 0 0
+                             0 0 0 0.35 0" result="hz"/>
+      <feMerge>
+        <feMergeNode in="hz"/>
+        <feMergeNode in="p"/>
+      </feMerge>
+    </filter>
+  </defs>
+</svg>
+<header>
+  <h1 class="inked">Mes Recettes</h1>
+</header>
+<nav class="tabs"><button class="tab-btn active" data-tab="canneles-bordelais" data-accent="78,18,48" onclick="switchTab('canneles-bordelais')">Cannelés bordelais</button>
+<button class="tab-btn" data-tab="cake-au-citron" data-accent="14,92,97" onclick="switchTab('cake-au-citron')">Cake au citron</button></nav>
+<main>
+<div class="recipe tab-content" id="recipe-0" data-base-servings="8" data-tab="canneles-bordelais" data-accent="78,18,48" style="--accent-rgb:78,18,48; --accent:rgb(78,18,48)">
+<div class="recipe-header">
+<h2 class="inked">Cannelés bordelais</h2>
+<label>Portions : <input type="number" class="servings-input" value="8" min="1" max="100" onchange="scaleRecipe(this)"></label>
+</div>
+<div class="table-wrap"><table>
+  <tr><td colspan="6" class="prep">Beurrer les moules (50 g de beurre)</td></tr>
+  <tr><td colspan="6" class="prep">Préchauffer le four à 220°C</td></tr>
+  <tr>
+    <td class="ingredient" data-qty="50" data-unit="cl" data-name="lait">50 cl lait</td>
+    <td rowspan="3" colspan="2" class="action">bouillir</td>
+    <td rowspan="8" class="action">mél. + refroidir</td>
+    <td rowspan="9" class="action">mél.</td>
+    <td rowspan="9" class="action">réfrigérer 1h, cuire 220°C 20 min puis 180°C 1h</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="0.5" data-unit="gousse" data-name="vanille (fendue et égrainée)">0.5 gousse vanille (fendue et égrainée)</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="50" data-unit="g" data-name="beurre doux">50 g beurre doux</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="100" data-unit="g" data-name="farine">100 g farine</td>
+    <td rowspan="3" class="action">mél.</td>
+    <td rowspan="5" class="action">mél.</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="250" data-unit="g" data-name="sucre en poudre">250 g sucre en poudre</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="1" data-unit="pincée" data-name="sel">1 pincée sel</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="2" data-unit="" data-name="oeufs entiers">2  oeufs entiers</td>
+    <td class="empty"></td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="2" data-unit="" data-name="jaunes d'oeuf">2  jaunes d'oeuf</td>
+    <td class="empty"></td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="1" data-unit="c. à soupe" data-name="rhum">1 c. à soupe rhum</td>
+    <td class="empty"></td>
+    <td class="empty"></td>
+    <td class="empty"></td>
+  </tr>
+</table></div>
+</div>
+<div class="recipe tab-content" id="recipe-1" data-base-servings="6" data-tab="cake-au-citron" data-accent="14,92,97" style="--accent-rgb:14,92,97; --accent:rgb(14,92,97)">
+<div class="recipe-header">
+<h2 class="inked">Cake au citron</h2>
+<label>Portions : <input type="number" class="servings-input" value="6" min="1" max="100" onchange="scaleRecipe(this)"></label>
+</div>
+<div class="table-wrap"><table>
+  <tr><td colspan="7" class="prep">Séparer les blancs des jaunes</td></tr>
+  <tr><td colspan="7" class="prep">Préchauffer le four à 180°C (th. 6)</td></tr>
+  <tr>
+    <td class="ingredient" data-qty="4" data-unit="" data-name="blancs d'oeufs">4  blancs d'oeufs</td>
+    <td colspan="4" class="action">battre en neige</td>
+    <td rowspan="7" class="action">mél.</td>
+    <td rowspan="7" class="action">cuire 180°C 30-40 min</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="100" data-unit="g" data-name="beurre">100 g beurre</td>
+    <td colspan="3" class="action">fondre</td>
+    <td rowspan="6" class="action">mél.</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="1" data-unit="" data-name="citron râpé (non traité)">1  citron râpé (non traité)</td>
+    <td class="action">râper</td>
+    <td rowspan="3" class="action">mél.</td>
+    <td rowspan="5" class="action">mél.</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="4" data-unit="" data-name="jaunes d'oeufs">4  jaunes d'oeufs</td>
+    <td rowspan="2" class="action">mél.</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="200" data-unit="g" data-name="sucre">200 g sucre</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="200" data-unit="g" data-name="farine">200 g farine</td>
+    <td class="empty"></td>
+    <td class="empty"></td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="0.5" data-unit="paquet" data-name="levure chimique">0.5 paquet levure chimique</td>
+    <td class="empty"></td>
+    <td class="empty"></td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="20" data-unit="morceaux" data-name="sucre n°4">20 morceaux sucre n°4</td>
+    <td rowspan="2" colspan="6" class="action">sirop à feu doux</td>
+  </tr>
+  <tr>
+    <td class="ingredient" data-qty="2" data-unit="" data-name="citrons (jus)">2  citrons (jus)</td>
+  </tr>
+</table></div>
+</div>
+</main>
+<div id="fs-overlay">
+  <button class="fs-close">fermer</button>
+  <div id="fs-container"></div>
+</div>
+<script>
+
+function formatQty(qty) {
+  if (qty === 0) return '0';
+  if (qty === Math.floor(qty)) return String(qty);
+  var r1 = Math.round(qty * 10) / 10;
+  if (Math.abs(qty - r1) < 0.01) return String(r1);
+  return String(Math.round(qty * 100) / 100);
+}
+
+function formatMetric(qty) {
+  const rounded = Math.round(qty);
+  if (Math.abs(qty - rounded) < 0.5) return String(rounded);
+  return qty.toPrecision(3);
+}
+
+function scaleRecipe(input) {
+  const recipeDiv = input.closest('.recipe');
+  const baseServings = parseFloat(recipeDiv.dataset.baseServings);
+  const newServings = parseFloat(input.value) || baseServings;
+  const scale = newServings / baseServings;
+
+  recipeDiv.querySelectorAll('td.ingredient[data-qty]').forEach(td => {
+    const baseQty = parseFloat(td.dataset.qty);
+    const unit = td.dataset.unit;
+    const name = td.dataset.name;
+    const newQty = baseQty * scale;
+
+    let text = formatQty(newQty) + ' ' + unit;
+    if (td.dataset.metricQty) {
+      const baseMetric = parseFloat(td.dataset.metricQty);
+      const metricUnit = td.dataset.metricUnit;
+      text += ' (' + formatMetric(baseMetric * scale) + ' ' + metricUnit + ')';
+    }
+    text += ' ' + name;
+    td.textContent = text;
+  });
+}
+
+function switchTab(tabName) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+  var btn = document.querySelector('.tab-btn[data-tab="' + tabName + '"]');
+  var content = document.querySelector('.tab-content[data-tab="' + tabName + '"]');
+  btn.classList.add('active');
+  content.classList.add('active');
+  // propagate accent to page
+  var rgb = btn.dataset.accent;
+  document.documentElement.style.setProperty('--accent-rgb', rgb);
+  document.documentElement.style.setProperty('--accent', 'rgb(' + rgb + ')');
+}
+
+function openFullscreen(tableWrap) {
+  var overlay = document.getElementById('fs-overlay');
+  var container = document.getElementById('fs-container');
+  container.innerHTML = '';
+  var clone = tableWrap.querySelector('table').cloneNode(true);
+  container.appendChild(clone);
+  overlay.classList.add('active');
+  document.body.style.overflow = 'hidden';
+  // Use native Fullscreen API if available
+  var el = overlay;
+  if (el.requestFullscreen) el.requestFullscreen();
+  else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+}
+
+function closeFullscreen() {
+  var overlay = document.getElementById('fs-overlay');
+  overlay.classList.remove('active');
+  document.body.style.overflow = '';
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    if (document.exitFullscreen) document.exitFullscreen();
+    else if (document.webkitExitFullscreen) document.webkitExitFullscreen();
+  }
+}
+
+// Sync overlay state when user exits fullscreen via browser/gesture
+document.addEventListener('fullscreenchange', function() {
+  if (!document.fullscreenElement) {
+    var overlay = document.getElementById('fs-overlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+document.addEventListener('webkitfullscreenchange', function() {
+  if (!document.webkitFullscreenElement) {
+    var overlay = document.getElementById('fs-overlay');
+    overlay.classList.remove('active');
+    document.body.style.overflow = '';
+  }
+});
+
+document.addEventListener('DOMContentLoaded', function() {
+  var first = document.querySelector('.tab-btn');
+  if (first) first.click();
+
+  document.querySelectorAll('.table-wrap').forEach(function(tw) {
+    tw.addEventListener('click', function(e) {
+      if (e.target.closest('.servings-input')) return;
+      openFullscreen(tw);
+    });
+  });
+
+  document.getElementById('fs-overlay').addEventListener('click', function(e) {
+    if (e.target === this || e.target.classList.contains('fs-close')) {
+      closeFullscreen();
+    }
+  });
+});
+
+</script>
+</body>
+</html>

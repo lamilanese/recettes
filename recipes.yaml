@@ -1,0 +1,113 @@
+recipes:
+  - title: "Cannelés bordelais"
+    color: "#4E1230"
+    servings: 8
+    prep:
+      - "Beurrer les moules (50 g de beurre)"
+      - "Préchauffer le four à 220°C"
+    groups:
+      - ingredients:
+          - qty: 50
+            unit: "cl"
+            name: "lait"
+          - qty: 0.5
+            unit: "gousse"
+            name: "vanille (fendue et égrainée)"
+          - qty: 50
+            unit: "g"
+            name: "beurre doux"
+        steps: ["bouillir"]
+        step_colspan: 2
+      - ingredients:
+          - qty: 100
+            unit: "g"
+            name: "farine"
+          - qty: 250
+            unit: "g"
+            name: "sucre en poudre"
+          - qty: 1
+            unit: "pincée"
+            name: "sel"
+        steps: ["mél."]
+      - ingredients:
+          - qty: 2
+            unit: ""
+            name: "oeufs entiers"
+          - qty: 2
+            unit: ""
+            name: "jaunes d'oeuf"
+        steps: []
+      - ingredients:
+          - qty: 1
+            unit: "c. à soupe"
+            name: "rhum"
+        steps: []
+    merges:
+      - groups: [1, 2]
+        action: "mél."
+      - groups: [0, "m0"]
+        action: "mél. + refroidir"
+      - groups: ["m1", 3]
+        action: "mél."
+    final: "réfrigérer 1h, cuire 220°C 20 min puis 180°C 1h"
+
+  - title: "Cake au citron"
+    color: "#0E5C61"
+    servings: 6
+    prep:
+      - "Séparer les blancs des jaunes"
+      - "Préchauffer le four à 180°C (th. 6)"
+    groups:
+      - ingredients:
+          - qty: 4
+            unit: ""
+            name: "blancs d'oeufs"
+        steps: ["battre en neige"]
+        step_colspan: 4
+      - ingredients:
+          - qty: 100
+            unit: "g"
+            name: "beurre"
+        steps: ["fondre"]
+        step_colspan: 3
+      - ingredients:
+          - qty: 1
+            unit: ""
+            name: "citron râpé (non traité)"
+        steps: ["râper"]
+      - ingredients:
+          - qty: 4
+            unit: ""
+            name: "jaunes d'oeufs"
+          - qty: 200
+            unit: "g"
+            name: "sucre"
+        steps: ["mél."]
+      - ingredients:
+          - qty: 200
+            unit: "g"
+            name: "farine"
+          - qty: 0.5
+            unit: "paquet"
+            name: "levure chimique"
+        steps: []
+      - ingredients:
+          - qty: 20
+            unit: "morceaux"
+            name: "sucre n°4"
+          - qty: 2
+            unit: ""
+            name: "citrons (jus)"
+        steps: ["sirop à feu doux"]
+        step_colspan: 6
+    merges:
+      - groups: [3, 2]
+        action: "mél."
+      - groups: ["m0", 4]
+        action: "mél."
+      - groups: ["m1", 1]
+        action: "mél."
+      - groups: ["m2", 0]
+        action: "mél."
+      - groups: ["m3"]
+        action: "cuire 180°C 30-40 min"
