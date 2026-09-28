@@ -211,28 +211,13 @@
   }
   #fs-container {
     flex: 1;
-    overflow: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 0.5rem;
+    overflow: hidden;
     display: flex;
     align-items: center;
     justify-content: center;
   }
   #fs-container table {
-    margin: auto;
-  }
-  #fs-container td {
-    padding: 10px 14px;
-    font-size: 1rem;
-  }
-  @media (max-width: 640px) {
-    #fs-container {
-      align-items: flex-start;
-    }
-    #fs-container td {
-      padding: 7px 9px;
-      font-size: 0.85rem;
-    }
+    transform-origin: center center;
   }
 
   @media (max-width: 640px) {
@@ -467,6 +452,20 @@ function switchTab(tabName) {
   document.documentElement.style.setProperty('--accent', 'rgb(' + rgb + ')');
 }
 
+function fitTable() {
+  var container = document.getElementById('fs-container');
+  var table = container.querySelector('table');
+  if (!table) return;
+  // Reset scale to measure natural size
+  table.style.transform = 'none';
+  var tw = table.offsetWidth;
+  var th = table.offsetHeight;
+  var sw = container.clientWidth;
+  var sh = container.clientHeight;
+  var scale = Math.min(sw / tw, sh / th);
+  table.style.transform = 'scale(' + scale + ')';
+}
+
 function openFullscreen(tableWrap) {
   var overlay = document.getElementById('fs-overlay');
   var container = document.getElementById('fs-container');
@@ -479,6 +478,8 @@ function openFullscreen(tableWrap) {
   var el = overlay;
   if (el.requestFullscreen) el.requestFullscreen();
   else if (el.webkitRequestFullscreen) el.webkitRequestFullscreen();
+  // Fit after layout settles (and after fullscreen transition)
+  requestAnimationFrame(function() { requestAnimationFrame(fitTable); });
 }
 
 function closeFullscreen() {
@@ -492,19 +493,19 @@ function closeFullscreen() {
 }
 
 // Sync overlay state when user exits fullscreen via browser/gesture
-document.addEventListener('fullscreenchange', function() {
-  if (!document.fullscreenElement) {
+function onFullscreenChange() {
+  if (document.fullscreenElement || document.webkitFullscreenElement) {
+    fitTable();
+  } else {
     var overlay = document.getElementById('fs-overlay');
     overlay.classList.remove('active');
     document.body.style.overflow = '';
   }
-});
-document.addEventListener('webkitfullscreenchange', function() {
-  if (!document.webkitFullscreenElement) {
-    var overlay = document.getElementById('fs-overlay');
-    overlay.classList.remove('active');
-    document.body.style.overflow = '';
-  }
+}
+document.addEventListener('fullscreenchange', onFullscreenChange);
+document.addEventListener('webkitfullscreenchange', onFullscreenChange);
+window.addEventListener('resize', function() {
+  if (document.getElementById('fs-overlay').classList.contains('active')) fitTable();
 });
 
 document.addEventListener('DOMContentLoaded', function() {
